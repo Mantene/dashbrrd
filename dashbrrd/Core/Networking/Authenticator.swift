@@ -93,7 +93,10 @@ final class QBittorrentAuthenticator: Authenticator, @unchecked Sendable {
 
     @discardableResult
     private func login() async throws -> String {
-        var request = URLRequest(url: baseURL.appendingPathComponent("/api/v2/auth/login"))
+        guard let loginURL = URL(string: baseURL.absoluteString + "/api/v2/auth/login") else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: loginURL)
         request.httpMethod = "POST"
         request.setValue(baseURL.absoluteString, forHTTPHeaderField: "Referer")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")

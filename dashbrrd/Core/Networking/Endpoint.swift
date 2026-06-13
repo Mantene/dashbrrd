@@ -26,10 +26,10 @@ struct Endpoint: Sendable {
     }
 
     func makeRequest(baseURL: URL) throws -> URLRequest {
-        guard var components = URLComponents(
-            url: baseURL.appendingPathComponent(path, isDirectory: false),
-            resolvingAgainstBaseURL: false
-        ) else { throw APIError.invalidURL }
+        // baseURL is normalized without a trailing slash; `path` begins with "/".
+        guard var components = URLComponents(string: baseURL.absoluteString + path) else {
+            throw APIError.invalidURL
+        }
 
         if !query.isEmpty {
             components.queryItems = (components.queryItems ?? []) + query
