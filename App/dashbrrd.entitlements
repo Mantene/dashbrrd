@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+      Shared Keychain access group so a future widget / notification-service extension can
+      read the same per-instance secrets the app writes. The $(AppIdentifierPrefix) is
+      filled in at sign time from the team prefix.
+    -->
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.dashbrrd.shared</string>
+    </array>
+</dict>
+</plist>
