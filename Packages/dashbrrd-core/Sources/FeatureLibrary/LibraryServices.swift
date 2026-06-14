@@ -32,3 +32,31 @@ public protocol ReleaseSearching: Sendable {
 public protocol ReleaseGrabbing: Sendable {
     func grab(_ release: Release) async throws
 }
+
+/// An instance new media can be added to (a Sonarr/Radarr config).
+public struct AddTarget: Sendable, Identifiable, Hashable {
+    public var id: InstanceID
+    public var name: String
+    public var kind: ServiceKind
+    public init(id: InstanceID, name: String, kind: ServiceKind) {
+        self.id = id; self.name = name; self.kind = kind
+    }
+}
+
+/// The choices required to add media to a target (fetched per instance).
+public struct AddOptions: Sendable {
+    public var qualityProfiles: [QualityProfile]
+    public var rootFolders: [RootFolder]
+    public init(qualityProfiles: [QualityProfile], rootFolders: [RootFolder]) {
+        self.qualityProfiles = qualityProfiles
+        self.rootFolders = rootFolders
+    }
+}
+
+/// Add-new-media flow. Implemented by `AppCore.LiveMediaAdder`.
+public protocol MediaAdding: Sendable {
+    func addableInstances() async -> [AddTarget]
+    func lookup(_ target: AddTarget, term: String) async throws -> [MediaLookupItem]
+    func options(_ target: AddTarget) async throws -> AddOptions
+    func add(_ item: MediaLookupItem, to target: AddTarget, qualityProfileID: Int, rootFolderPath: String, monitored: Bool, searchOnAdd: Bool) async throws
+}

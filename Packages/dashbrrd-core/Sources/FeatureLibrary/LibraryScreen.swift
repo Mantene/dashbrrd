@@ -7,6 +7,7 @@ import DesignSystem
 public struct LibraryScreen: View {
     @State private var store: LibraryStore
     @State private var selected: MediaItem?
+    @State private var addingMedia = false
 
     public init(store: LibraryStore) {
         _store = State(initialValue: store)
@@ -26,10 +27,18 @@ public struct LibraryScreen: View {
             }
         }
         .navigationTitle("Library")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { addingMedia = true } label: { Label("Add Media", systemImage: "plus") }
+            }
+        }
         .task { await store.load() }
         .refreshable { await store.load() }
         .sheet(item: $selected) { item in
             MediaDetailView(item: item, store: store)
+        }
+        .sheet(isPresented: $addingMedia) {
+            AddMediaView(store: store.makeAddStore())
         }
         .alert("Action Failed", isPresented: Binding(
             get: { store.actionError != nil },

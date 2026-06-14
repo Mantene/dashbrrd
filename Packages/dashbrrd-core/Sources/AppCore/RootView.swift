@@ -38,7 +38,8 @@ public struct RootView: View {
             loader: services.libraryLoader,
             controller: services.mediaController,
             releaseSearcher: services.releaseSearcher,
-            releaseGrabber: services.releaseGrabber
+            releaseGrabber: services.releaseGrabber,
+            adder: services.mediaAdder
         ))
         _queueStore = State(initialValue: QueueStore(
             loader: services.queueLoader,

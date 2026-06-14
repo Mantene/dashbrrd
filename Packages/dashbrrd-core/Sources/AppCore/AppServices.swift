@@ -21,6 +21,7 @@ public struct AppServices {
     let mediaController: any MediaControlling
     let releaseSearcher: any ReleaseSearching
     let releaseGrabber: any ReleaseGrabbing
+    let mediaAdder: any MediaAdding
     let queueLoader: any QueueLoading
     let queueController: any QueueControlling
     let historyLoader: any HistoryLoading
@@ -36,6 +37,7 @@ public struct AppServices {
         let releaseController = LiveReleaseController(container: container, keychain: keychain)
         self.releaseSearcher = releaseController
         self.releaseGrabber = releaseController
+        self.mediaAdder = LiveMediaAdder(container: container, keychain: keychain)
         self.queueLoader = QueueAggregator(container: container, keychain: keychain)
         self.queueController = LiveQueueController(container: container, keychain: keychain)
         self.historyLoader = HistoryAggregator(container: container, keychain: keychain)

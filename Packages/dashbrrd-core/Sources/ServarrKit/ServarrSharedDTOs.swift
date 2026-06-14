@@ -94,3 +94,14 @@ struct ServarrGrabRequest: Encodable, Sendable {
     let guid: String
     let indexerId: Int
 }
+
+// Add-flow option lists.
+struct ServarrQualityProfileDTO: Decodable, Sendable {
+    let id: Int
+    let name: String
+}
+
+struct ServarrRootFolderDTO: Decodable, Sendable {
+    let path: String
+    let freeSpace: Int64?
+}

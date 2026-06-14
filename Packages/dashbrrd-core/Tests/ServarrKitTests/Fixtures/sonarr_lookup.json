@@ -1,0 +1,19 @@
+[
+  {
+    "title": "Breaking Bad",
+    "year": 2008,
+    "tvdbId": 81189,
+    "overview": "A high school chemistry teacher turned methamphetamine producer.",
+    "images": [
+      { "coverType": "poster", "remoteUrl": "https://example.test/bb.jpg" }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Better Call Saul",
+    "year": 2015,
+    "tvdbId": 273181,
+    "overview": "The trials of criminal lawyer Jimmy McGill.",
+    "images": []
+  }
+]

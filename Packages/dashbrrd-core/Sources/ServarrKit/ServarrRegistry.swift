@@ -98,6 +98,59 @@ public enum ServarrRegistry {
         }
     }
 
+    /// Lookup search for new media (Sonarr series / Radarr movie).
+    public static func lookup(kind: ServiceKind, profile: ConnectionProfile, term: String) async throws -> [MediaLookupItem] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).lookup(resource: "series", term: term)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).lookup(resource: "movie", term: term)
+        default: []
+        }
+    }
+
+    public static func qualityProfiles(kind: ServiceKind, profile: ConnectionProfile) async throws -> [QualityProfile] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).qualityProfiles()
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).qualityProfiles()
+        default: []
+        }
+    }
+
+    public static func rootFolders(kind: ServiceKind, profile: ConnectionProfile) async throws -> [RootFolder] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).rootFolders()
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).rootFolders()
+        default: []
+        }
+    }
+
+    /// Adds new media. A real state change. `extraFields` injects per-app requirements.
+    public static func addMedia(
+        kind: ServiceKind,
+        profile: ConnectionProfile,
+        payload: Data,
+        qualityProfileID: Int,
+        rootFolderPath: String,
+        monitored: Bool,
+        searchOnAdd: Bool
+    ) async throws {
+        switch kind {
+        case .sonarr:
+            try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).addMedia(
+                resource: "series", payload: payload, qualityProfileID: qualityProfileID,
+                rootFolderPath: rootFolderPath, monitored: monitored, searchOnAdd: searchOnAdd,
+                searchOptionKey: "searchForMissingEpisodes"
+            )
+        case .radarr:
+            try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).addMedia(
+                resource: "movie", payload: payload, qualityProfileID: qualityProfileID,
+                rootFolderPath: rootFolderPath, monitored: monitored, searchOnAdd: searchOnAdd,
+                searchOptionKey: "searchForMovie", extraFields: ["minimumAvailability": "released"]
+            )
+        default:
+            break
+        }
+    }
+
     /// The REST resource name for a kind's media records ("series" / "movie").
     static func mediaResource(for kind: ServiceKind) -> String? {
         switch kind {

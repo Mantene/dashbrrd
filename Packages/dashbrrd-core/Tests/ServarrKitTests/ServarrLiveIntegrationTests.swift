@@ -106,6 +106,20 @@ struct ServarrLiveIntegrationTests {
         }
     }
 
+    @Test("live lookup + add-options decode (read-only)", arguments: [ServiceKind.sonarr, .radarr])
+    func liveLookupAndOptions(kind: ServiceKind) async throws {
+        guard let profile = Self.profile(for: kind) else { return }
+        let term = kind == .sonarr ? "breaking bad" : "inception"
+        let results = try await ServarrRegistry.lookup(kind: kind, profile: profile, term: term)
+        #expect(!results.isEmpty)
+        #expect(results.allSatisfy { $0.serviceKind == kind && !$0.rawPayload.isEmpty })
+
+        let profiles = try await ServarrRegistry.qualityProfiles(kind: kind, profile: profile)
+        let folders = try await ServarrRegistry.rootFolders(kind: kind, profile: profile)
+        #expect(!profiles.isEmpty)   // every server has at least one quality profile
+        #expect(!folders.isEmpty)    // and a root folder
+    }
+
     /// Authorized one-off live grab. Gated by GRAB_CONFIRM=1. Picks the SMALLEST grabbable
     /// release for the first Sonarr series and grabs it, printing exactly what was sent.
     @Test("live grab smallest (gated)")

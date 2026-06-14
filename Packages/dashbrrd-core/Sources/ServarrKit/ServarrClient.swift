@@ -64,6 +64,76 @@ public actor ServarrClient<Descriptor: ServarrDescriptor> {
         }
     }
 
+    /// Lookup search for new media (`resource` is "series"/"movie" → hits `{resource}/lookup`).
+    /// Keeps each result's raw JSON so `addMedia` can POST it back with the chosen fields.
+    public func lookup(resource: String, term: String) async throws -> [MediaLookupItem] {
+        let data = try await http.data(for: Endpoint(path: "\(resource)/lookup", query: [URLQueryItem(name: "term", value: term)]))
+        guard let array = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            throw APIError.decoding("Expected an array for \(resource)/lookup", raw: String(data: data, encoding: .utf8))
+        }
+        return array.map { dict in
+            let payload = (try? JSONSerialization.data(withJSONObject: dict)) ?? Data()
+            let remoteID = dict["id"] as? Int ?? 0
+            let title = dict["title"] as? String ?? "Unknown"
+            let year = dict["year"] as? Int
+            let externalID = dict["tvdbId"] as? Int ?? dict["tmdbId"] as? Int ?? 0
+            return MediaLookupItem(
+                id: "\(descriptor.kind.rawValue):\(externalID):\(title):\(year ?? 0)",
+                instanceID: instanceID,
+                serviceKind: descriptor.kind,
+                title: title,
+                year: year,
+                posterURL: Self.posterURL(fromImages: dict["images"]),
+                overview: dict["overview"] as? String,
+                alreadyInLibrary: remoteID > 0,
+                rawPayload: payload
+            )
+        }
+    }
+
+    public func qualityProfiles() async throws -> [QualityProfile] {
+        try await http.send(Endpoint(path: "qualityprofile"), as: [ServarrQualityProfileDTO].self)
+            .map { QualityProfile(id: $0.id, name: $0.name) }
+    }
+
+    public func rootFolders() async throws -> [RootFolder] {
+        try await http.send(Endpoint(path: "rootfolder"), as: [ServarrRootFolderDTO].self)
+            .map { RootFolder(path: $0.path, freeSpaceBytes: $0.freeSpace) }
+    }
+
+    /// Adds new media by re-POSTing the lookup payload with the user's chosen fields injected.
+    /// `searchOptionKey` is "searchForMissingEpisodes" (Sonarr) or "searchForMovie" (Radarr);
+    /// `extraFields` carries app-specific requirements (e.g. Radarr's minimumAvailability).
+    public func addMedia(
+        resource: String,
+        payload: Data,
+        qualityProfileID: Int,
+        rootFolderPath: String,
+        monitored: Bool,
+        searchOnAdd: Bool,
+        searchOptionKey: String,
+        extraFields: [String: Sendable] = [:]
+    ) async throws {
+        guard var dict = try JSONSerialization.jsonObject(with: payload) as? [String: Any] else {
+            throw APIError.decoding("Add payload is not a JSON object", raw: nil)
+        }
+        dict["qualityProfileId"] = qualityProfileID
+        dict["rootFolderPath"] = rootFolderPath
+        dict["monitored"] = monitored
+        dict["addOptions"] = [searchOptionKey: searchOnAdd]
+        for (key, value) in extraFields { dict[key] = value }
+        let body = try JSONSerialization.data(withJSONObject: dict)
+        _ = try await http.data(for: Endpoint(method: .post, path: resource, body: body))
+    }
+
+    /// Extracts the poster `remoteUrl` (preferred) or `url` from a Servarr images array.
+    static func posterURL(fromImages images: Any?) -> URL? {
+        guard let images = images as? [[String: Any]] else { return nil }
+        let poster = images.first { ($0["coverType"] as? String) == "poster" }
+        let urlString = (poster?["remoteUrl"] as? String) ?? (poster?["url"] as? String)
+        return urlString.flatMap(URL.init(string:))
+    }
+
     /// Grabs a release → Servarr sends it to the appropriate download client. A real state change.
     public func grab(guid: String, indexerID: Int) async throws {
         let body = try JSONEncoder().encode(ServarrGrabRequest(guid: guid, indexerId: indexerID))

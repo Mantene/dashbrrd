@@ -16,22 +16,30 @@ public final class LibraryStore {
     private let controller: any MediaControlling
     private let releaseSearcher: any ReleaseSearching
     private let releaseGrabber: any ReleaseGrabbing
+    private let adder: any MediaAdding
 
     public init(
         loader: any LibraryLoading,
         controller: any MediaControlling,
         releaseSearcher: any ReleaseSearching,
-        releaseGrabber: any ReleaseGrabbing
+        releaseGrabber: any ReleaseGrabbing,
+        adder: any MediaAdding
     ) {
         self.loader = loader
         self.controller = controller
         self.releaseSearcher = releaseSearcher
         self.releaseGrabber = releaseGrabber
+        self.adder = adder
     }
 
     /// Builds a release-search store for a media item (used by the detail view).
     public func makeReleaseStore(for item: MediaItem) -> ReleaseStore {
         ReleaseStore(item: item, searcher: releaseSearcher, grabber: releaseGrabber)
+    }
+
+    /// Builds an add-media store (used by the Library "+" action).
+    public func makeAddStore() -> AddMediaStore {
+        AddMediaStore(adder: adder)
     }
 
     public func load() async {
