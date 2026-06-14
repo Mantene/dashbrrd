@@ -8,7 +8,7 @@ import Networking
 /// connection tester free of per-app branching. Adding an *arr = one new case here + its folder.
 public enum ServarrRegistry {
     /// Servarr kinds dashbrrd can currently talk to.
-    public static let supportedKinds: Set<ServiceKind> = [.sonarr, .radarr, .prowlarr]
+    public static let supportedKinds: Set<ServiceKind> = [.sonarr, .radarr, .prowlarr, .lidarr]
 
     public static func isSupported(_ kind: ServiceKind) -> Bool {
         supportedKinds.contains(kind)
@@ -20,6 +20,7 @@ public enum ServarrRegistry {
         case .sonarr: SonarrDescriptor().capabilities
         case .radarr: RadarrDescriptor().capabilities
         case .prowlarr: ProwlarrDescriptor().capabilities
+        case .lidarr: LidarrDescriptor().capabilities
         default: []
         }
     }
@@ -30,6 +31,7 @@ public enum ServarrRegistry {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).systemStatus()
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).systemStatus()
         case .prowlarr: try await ServarrClientFactory.make(descriptor: ProwlarrDescriptor(), profile: profile).systemStatus()
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).systemStatus()
         default: throw APIError.notFound
         }
     }
@@ -40,6 +42,7 @@ public enum ServarrRegistry {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).health()
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).health()
         case .prowlarr: try await ServarrClientFactory.make(descriptor: ProwlarrDescriptor(), profile: profile).health()
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).health()
         default: throw APIError.notFound
         }
     }
@@ -49,6 +52,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).calendar(range)
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).calendar(range)
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).calendar(range)
         default: []
         }
     }
@@ -58,6 +62,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).queue()
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).queue()
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).queue()
         default: []
         }
     }
@@ -67,6 +72,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).history(request)
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).history(request)
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).history(request)
         default: Page(page: request.page, pageSize: request.pageSize, totalRecords: 0, records: [])
         }
     }
@@ -76,6 +82,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).library()
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).library()
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).library()
         default: []
         }
     }
@@ -174,6 +181,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: "series"
         case .radarr: "movie"
+        case .lidarr: "artist"
         default: nil
         }
     }
@@ -183,6 +191,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).setMonitored(resource: resource, id: remoteID, monitored: monitored)
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).setMonitored(resource: resource, id: remoteID, monitored: monitored)
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).setMonitored(resource: resource, id: remoteID, monitored: monitored)
         default: break
         }
     }
@@ -192,6 +201,7 @@ public enum ServarrRegistry {
         switch kind {
         case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).deleteMedia(resource: resource, id: remoteID, deleteFiles: deleteFiles)
         case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).deleteMedia(resource: resource, id: remoteID, deleteFiles: deleteFiles)
+        case .lidarr: try await ServarrClientFactory.make(descriptor: LidarrDescriptor(), profile: profile).deleteMedia(resource: resource, id: remoteID, deleteFiles: deleteFiles)
         default: break
         }
     }

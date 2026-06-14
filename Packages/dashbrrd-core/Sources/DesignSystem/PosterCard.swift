@@ -51,5 +51,15 @@ public struct PosterCard: View {
                     .lineLimit(1)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var accessibilityText: String {
+        var parts = [item.displayTitle]
+        if let subtitle = item.subtitle { parts.append(subtitle) }
+        if !item.monitored { parts.append("not monitored") }
+        return parts.joined(separator: ", ")
     }
 }

@@ -17,6 +17,10 @@ public final class AppContainer {
     public let services: AppServices
 
     public init() {
+        // Bump the shared URL cache so AsyncImage poster loads (URLSession.shared) are cached
+        // across scrolls and launches instead of refetching.
+        URLCache.shared = URLCache(memoryCapacity: 64 * 1_024 * 1_024, diskCapacity: 512 * 1_024 * 1_024)
+
         let container: ModelContainer
         do {
             let schema = Schema([ServerConfigModel.self])

@@ -1,0 +1,17 @@
+[
+  {
+    "id": 11,
+    "title": "Example Album",
+    "releaseDate": "2026-07-01T00:00:00Z",
+    "monitored": true,
+    "artist": { "artistName": "Example Artist" },
+    "images": [ { "coverType": "cover", "remoteUrl": "https://example.test/album11.jpg" } ]
+  },
+  {
+    "id": 12,
+    "title": "Album With No Date",
+    "releaseDate": null,
+    "monitored": true,
+    "artist": { "artistName": "Another Artist" }
+  }
+]

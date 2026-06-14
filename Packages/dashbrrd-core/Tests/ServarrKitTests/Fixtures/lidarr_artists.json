@@ -1,0 +1,17 @@
+[
+  {
+    "id": 5,
+    "artistName": "Zztop Example",
+    "monitored": true,
+    "overview": "An example artist.",
+    "statistics": { "albumCount": 12, "trackCount": 140, "trackFileCount": 130 },
+    "images": [ { "coverType": "poster", "remoteUrl": "https://example.test/artist5.jpg" } ]
+  },
+  {
+    "id": 6,
+    "artistName": "Aaa Band",
+    "monitored": false,
+    "statistics": { "albumCount": 3, "trackCount": 30, "trackFileCount": 30 },
+    "images": []
+  }
+]
