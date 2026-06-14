@@ -43,3 +43,26 @@ struct ServarrQueueRecordDTO: Decodable, Sendable {
     let timeleft: String?
     let downloadId: String?
 }
+
+// Shared `history` shape (Sonarr/Radarr v3): a paged list of events.
+struct ServarrHistoryResponseDTO: Decodable, Sendable {
+    let page: Int
+    let pageSize: Int
+    let totalRecords: Int
+    let records: [ServarrHistoryRecordDTO]
+}
+
+struct ServarrHistoryRecordDTO: Decodable, Sendable {
+    let id: Int
+    let eventType: String
+    let sourceTitle: String?
+    let date: Date
+    let quality: QualityWrapperDTO?
+
+    struct QualityWrapperDTO: Decodable, Sendable {
+        let quality: QualityNameDTO?
+        struct QualityNameDTO: Decodable, Sendable { let name: String? }
+    }
+
+    var qualityName: String? { quality?.quality?.name }
+}

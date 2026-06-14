@@ -92,10 +92,25 @@ public actor HTTPClient: HTTPClientProtocol {
 }
 
 extension JSONDecoder {
-    /// Shared decoder configured for Servarr's ISO-8601 timestamps.
+    /// Shared decoder for Servarr/download-client JSON. Servarr emits ISO-8601 timestamps
+    /// both with and without fractional seconds (e.g. calendar vs history), so we try the
+    /// fractional formatter first and fall back to the plain one.
     public static var servarr: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        let withFraction = ISO8601DateFormatter()
+        withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let plain = ISO8601DateFormatter()
+        plain.formatOptions = [.withInternetDateTime]
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let raw = try decoder.singleValueContainer().decode(String.self)
+            if let date = withFraction.date(from: raw) ?? plain.date(from: raw) {
+                return date
+            }
+            throw DecodingError.dataCorrupted(.init(
+                codingPath: decoder.codingPath,
+                debugDescription: "Unrecognized date: \(raw)"
+            ))
+        }
         return decoder
     }
 }

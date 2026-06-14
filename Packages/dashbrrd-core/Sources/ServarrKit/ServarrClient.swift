@@ -61,6 +61,31 @@ public actor ServarrClient<Descriptor: ServarrDescriptor> {
         }
     }
 
+    /// A page of activity/history (shared shape across Sonarr/Radarr), newest first.
+    public func history(_ request: PagedRequest) async throws -> Page<HistoryRecord> {
+        let dto = try await http.send(
+            Endpoint(path: "history", query: [
+                URLQueryItem(name: "page", value: "\(request.page)"),
+                URLQueryItem(name: "pageSize", value: "\(request.pageSize)"),
+                URLQueryItem(name: "sortKey", value: request.sortKey ?? "date"),
+                URLQueryItem(name: "sortDirection", value: (request.sortDirection ?? .descending).rawValue),
+            ]),
+            as: ServarrHistoryResponseDTO.self
+        )
+        let records = dto.records.map { record in
+            HistoryRecord(
+                id: "\(instanceID.rawValue.uuidString):\(record.id)",
+                instanceID: instanceID,
+                serviceKind: descriptor.kind,
+                eventType: HistoryRecord.EventType(servarrEventType: record.eventType),
+                title: record.sourceTitle ?? "Unknown",
+                date: record.date,
+                quality: record.qualityName
+            )
+        }
+        return Page(page: dto.page, pageSize: dto.pageSize, totalRecords: dto.totalRecords, records: records)
+    }
+
     /// All health checks the service currently reports (shared shape across every *arr).
     public func health() async throws -> [HealthCheck] {
         let dtos = try await http.send(Endpoint(path: "health"), as: [ServarrHealthDTO].self)

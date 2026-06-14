@@ -6,6 +6,7 @@ import FeatureCalendar
 import FeatureHealth
 import FeatureLibrary
 import FeatureQueue
+import FeatureHistory
 
 /// The composed set of live service implementations, built once from infrastructure and
 /// handed to `RootView`, which constructs the feature stores from them. This is the bridge
@@ -19,6 +20,7 @@ public struct AppServices {
     let libraryLoader: any LibraryLoading
     let queueLoader: any QueueLoading
     let queueController: any QueueControlling
+    let historyLoader: any HistoryLoading
 
     public init(container: ModelContainer, keychain: KeychainStore) {
         let repository = ServerConfigRepository(context: container.mainContext, keychain: keychain)
@@ -29,6 +31,7 @@ public struct AppServices {
         self.libraryLoader = LibraryAggregator(container: container, keychain: keychain)
         self.queueLoader = QueueAggregator(container: container, keychain: keychain)
         self.queueController = LiveQueueController(container: container, keychain: keychain)
+        self.historyLoader = HistoryAggregator(container: container, keychain: keychain)
     }
 }
 

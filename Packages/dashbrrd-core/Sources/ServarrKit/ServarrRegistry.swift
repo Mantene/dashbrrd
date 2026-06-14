@@ -62,6 +62,15 @@ public enum ServarrRegistry {
         }
     }
 
+    /// A page of history for history-capable kinds; an empty page otherwise.
+    public static func history(kind: ServiceKind, profile: ConnectionProfile, request: PagedRequest) async throws -> Page<HistoryRecord> {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).history(request)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).history(request)
+        default: Page(page: request.page, pageSize: request.pageSize, totalRecords: 0, records: [])
+        }
+    }
+
     /// Library (series/movies) for library-capable kinds; `[]` otherwise.
     public static func library(kind: ServiceKind, profile: ConnectionProfile) async throws -> [MediaItem] {
         switch kind {

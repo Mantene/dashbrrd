@@ -1,0 +1,25 @@
+{
+  "page": 1,
+  "pageSize": 2,
+  "totalRecords": 3311,
+  "records": [
+    {
+      "id": 99001,
+      "eventType": "downloadFolderImported",
+      "sourceTitle": "Example.Show.S01E01.WEBDL-1080p",
+      "date": "2026-06-13T05:30:01Z",
+      "seriesId": 5,
+      "episodeId": 51,
+      "quality": { "quality": { "id": 3, "name": "WEBDL-1080p" } }
+    },
+    {
+      "id": 99000,
+      "eventType": "grabbed",
+      "sourceTitle": "Example.Show.S01E02.HDTV-720p",
+      "date": "2026-06-12T22:00:00.123Z",
+      "seriesId": 5,
+      "episodeId": 52,
+      "quality": { "quality": { "name": "HDTV-720p" } }
+    }
+  ]
+}

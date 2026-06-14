@@ -82,4 +82,15 @@ struct ServarrLiveIntegrationTests {
             #expect(item.progress >= 0 && item.progress <= 1)
         }
     }
+
+    @Test("live history decodes a page through the real stack", arguments: [ServiceKind.sonarr, .radarr])
+    func liveHistory(kind: ServiceKind) async throws {
+        guard let profile = Self.profile(for: kind) else { return }
+        let page = try await ServarrRegistry.history(kind: kind, profile: profile, request: PagedRequest(page: 1, pageSize: 10))
+        #expect(page.pageSize == 10)
+        for record in page.records {
+            #expect(record.serviceKind == kind)
+            #expect(!record.title.isEmpty)
+        }
+    }
 }
