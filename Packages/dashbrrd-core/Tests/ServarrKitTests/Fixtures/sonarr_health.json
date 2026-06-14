@@ -1,0 +1,24 @@
+[
+  {
+    "source": "IndexerLongTermStatusCheck",
+    "type": "warning",
+    "message": "Indexers unavailable due to failures for more than 6 hours",
+    "wikiUrl": "https://wiki.servarr.com/sonarr/system#indexers-are-unavailable-due-to-failures"
+  },
+  {
+    "source": "ApplicationLongTermStatusCheck",
+    "type": "error",
+    "message": "Branch is not a valid release branch"
+  },
+  {
+    "source": "UpdateCheck",
+    "type": "notice",
+    "message": "A new update is available",
+    "wikiUrl": null
+  },
+  {
+    "source": "ImportListStatusCheck",
+    "type": "ok",
+    "message": "All good"
+  }
+]

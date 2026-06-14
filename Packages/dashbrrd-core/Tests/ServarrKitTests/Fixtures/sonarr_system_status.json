@@ -1,0 +1,13 @@
+{
+  "appName": "Sonarr",
+  "instanceName": "Sonarr",
+  "version": "4.0.17.2952",
+  "buildTime": "2026-03-19T14:53:39Z",
+  "isProduction": true,
+  "branch": "main",
+  "authentication": "forms",
+  "urlBase": "",
+  "runtimeVersion": "6.0.13",
+  "isDocker": true,
+  "databaseType": "postgreSQL"
+}

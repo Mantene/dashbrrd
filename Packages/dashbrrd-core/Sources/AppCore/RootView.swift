@@ -15,8 +15,16 @@ import FeatureSettings
 public struct RootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var navigation = NavigationModel()
+    @State private var settingsStore: SettingsStore
+    @State private var calendarStore: CalendarStore
 
-    public init() {}
+    public init(services: AppServices) {
+        _settingsStore = State(initialValue: SettingsStore(
+            store: services.serverStore,
+            tester: services.connectionTester
+        ))
+        _calendarStore = State(initialValue: CalendarStore(loader: services.calendarLoader))
+    }
 
     public var body: some View {
         #if os(iOS)
@@ -79,11 +87,11 @@ public struct RootView: View {
     private func screen(for section: NavigationModel.Section) -> some View {
         switch section {
         case .dashboard: DashboardScreen()
-        case .calendar: CalendarScreen()
+        case .calendar: CalendarScreen(store: calendarStore)
         case .queue: QueueScreen()
         case .library: LibraryScreen()
         case .activity: HistoryScreen()
-        case .settings: SettingsScreen()
+        case .settings: SettingsScreen(store: settingsStore)
         }
     }
 }

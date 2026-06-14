@@ -11,11 +11,9 @@ import PackageDescription
 //
 // Dual-platform: iOS 18 is the ship target; macOS 15 exists only so the logic layers
 // build + `swift test` on a Mac without booting a simulator. iOS-only runtime APIs are
-// guarded with `#if os(iOS)`.
+// guarded with `#if os(iOS)`. Swift Testing is bundled with the toolchain (no package dep).
 
 let strictConcurrency: [SwiftSetting] = [
-    // tools 6.0 already defaults to Swift 6 language mode (full strict concurrency);
-    // this is here as a belt-and-suspenders marker for future tool bumps.
     .swiftLanguageMode(.v6)
 ]
 
@@ -43,78 +41,27 @@ let package = Package(
     ],
     targets: [
         // MARK: - Foundation layers
-        .target(
-            name: "CoreModel",
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "Networking",
-            dependencies: ["CoreModel"],
-            swiftSettings: strictConcurrency
-        ),
+        .target(name: "CoreModel", swiftSettings: strictConcurrency),
+        .target(name: "Networking", dependencies: ["CoreModel"], swiftSettings: strictConcurrency),
 
         // MARK: - Service engines (no SwiftUI / SwiftData)
-        .target(
-            name: "ServarrKit",
-            dependencies: ["Networking", "CoreModel"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "DownloadClientKit",
-            dependencies: ["Networking", "CoreModel"],
-            swiftSettings: strictConcurrency
-        ),
+        .target(name: "ServarrKit", dependencies: ["Networking", "CoreModel"], swiftSettings: strictConcurrency),
+        .target(name: "DownloadClientKit", dependencies: ["Networking", "CoreModel"], swiftSettings: strictConcurrency),
 
         // MARK: - Persistence (SwiftData + Keychain)
-        .target(
-            name: "PersistenceKit",
-            dependencies: ["Networking", "CoreModel"],
-            swiftSettings: strictConcurrency
-        ),
+        .target(name: "PersistenceKit", dependencies: ["Networking", "CoreModel"], swiftSettings: strictConcurrency),
 
         // MARK: - UI foundation
-        .target(
-            name: "DesignSystem",
-            dependencies: ["CoreModel"],
-            swiftSettings: strictConcurrency
-        ),
+        .target(name: "DesignSystem", dependencies: ["CoreModel"], swiftSettings: strictConcurrency),
 
         // MARK: - Feature modules (never depend on each other)
-        .target(
-            name: "FeatureCalendar",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "FeatureQueue",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "DownloadClientKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "FeatureLibrary",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "FeatureSearch",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "DownloadClientKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "FeatureHistory",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "FeatureHealth",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
-        .target(
-            name: "FeatureSettings",
-            dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "DownloadClientKit", "PersistenceKit"],
-            swiftSettings: strictConcurrency
-        ),
+        .target(name: "FeatureCalendar", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"], swiftSettings: strictConcurrency),
+        .target(name: "FeatureQueue", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "DownloadClientKit", "PersistenceKit"], swiftSettings: strictConcurrency),
+        .target(name: "FeatureLibrary", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"], swiftSettings: strictConcurrency),
+        .target(name: "FeatureSearch", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "DownloadClientKit", "PersistenceKit"], swiftSettings: strictConcurrency),
+        .target(name: "FeatureHistory", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"], swiftSettings: strictConcurrency),
+        .target(name: "FeatureHealth", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "PersistenceKit"], swiftSettings: strictConcurrency),
+        .target(name: "FeatureSettings", dependencies: ["DesignSystem", "CoreModel", "ServarrKit", "DownloadClientKit", "PersistenceKit"], swiftSettings: strictConcurrency),
 
         // MARK: - Composition layer
         .target(
@@ -128,15 +75,13 @@ let package = Package(
             swiftSettings: strictConcurrency
         ),
 
-        // MARK: - Test targets
+        // MARK: - Test targets (Swift Testing is bundled with the toolchain)
+        .testTarget(name: "CoreModelTests", dependencies: ["CoreModel"], swiftSettings: strictConcurrency),
+        .testTarget(name: "NetworkingTests", dependencies: ["Networking", "CoreModel"], swiftSettings: strictConcurrency),
         .testTarget(
-            name: "CoreModelTests",
-            dependencies: ["CoreModel"],
-            swiftSettings: strictConcurrency
-        ),
-        .testTarget(
-            name: "NetworkingTests",
-            dependencies: ["Networking", "CoreModel"],
+            name: "ServarrKitTests",
+            dependencies: ["ServarrKit", "Networking", "CoreModel"],
+            resources: [.process("Fixtures")],
             swiftSettings: strictConcurrency
         ),
     ]

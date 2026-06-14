@@ -11,7 +11,7 @@ struct DashbrrdApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootScene()
+            RootScene(services: container.services)
                 .environment(container)
         }
         .modelContainer(container.modelContainer)

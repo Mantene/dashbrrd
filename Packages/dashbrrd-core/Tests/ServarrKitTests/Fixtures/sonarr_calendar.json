@@ -1,0 +1,66 @@
+[
+  {
+    "id": 101,
+    "seriesId": 5,
+    "seasonNumber": 4,
+    "episodeNumber": 6,
+    "title": "Example Episode A",
+    "airDate": "2026-06-01",
+    "airDateUtc": "2026-06-01T01:00:00Z",
+    "hasFile": false,
+    "monitored": true,
+    "overview": "An example episode overview.",
+    "episodeFileId": 0,
+    "unverifiedSceneNumbering": false,
+    "runtime": 42,
+    "tvdbId": 111,
+    "series": {
+      "id": 5,
+      "title": "Example Series One",
+      "sortTitle": "example series one",
+      "cleanTitle": "exampleseriesone",
+      "titleSlug": "example-series-one",
+      "path": "/tv/Example Series One",
+      "year": 2024,
+      "network": "Example Net",
+      "status": "continuing",
+      "monitored": true,
+      "runtime": 42,
+      "images": [
+        { "coverType": "banner", "url": "/MediaCover/5/banner.jpg", "remoteUrl": "https://example.test/banner.jpg" },
+        { "coverType": "poster", "url": "/MediaCover/5/poster.jpg", "remoteUrl": "https://example.test/poster.jpg" }
+      ]
+    }
+  },
+  {
+    "id": 102,
+    "seriesId": 7,
+    "seasonNumber": 1,
+    "episodeNumber": 1,
+    "title": "Example Episode B",
+    "airDate": "2026-06-03",
+    "airDateUtc": "2026-06-03T02:30:00Z",
+    "hasFile": true,
+    "monitored": true,
+    "overview": null,
+    "series": {
+      "id": 7,
+      "title": "Example Series Two",
+      "images": []
+    }
+  },
+  {
+    "id": 103,
+    "seriesId": 7,
+    "seasonNumber": 1,
+    "episodeNumber": 2,
+    "title": "Episode With No Air Date",
+    "airDateUtc": null,
+    "hasFile": false,
+    "monitored": false,
+    "series": {
+      "id": 7,
+      "title": "Example Series Two"
+    }
+  }
+]
