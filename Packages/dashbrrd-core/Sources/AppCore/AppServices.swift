@@ -4,6 +4,7 @@ import PersistenceKit
 import FeatureSettings
 import FeatureCalendar
 import FeatureHealth
+import FeatureLibrary
 
 /// The composed set of live service implementations, built once from infrastructure and
 /// handed to `RootView`, which constructs the feature stores from them. This is the bridge
@@ -14,6 +15,7 @@ public struct AppServices {
     let connectionTester: any ConnectionTesting
     let calendarLoader: any CalendarLoading
     let healthLoader: any HealthLoading
+    let libraryLoader: any LibraryLoading
 
     public init(container: ModelContainer, keychain: KeychainStore) {
         let repository = ServerConfigRepository(context: container.mainContext, keychain: keychain)
@@ -21,6 +23,7 @@ public struct AppServices {
         self.connectionTester = LiveConnectionTester()
         self.calendarLoader = CalendarAggregator(container: container, keychain: keychain)
         self.healthLoader = HealthAggregator(container: container, keychain: keychain)
+        self.libraryLoader = LibraryAggregator(container: container, keychain: keychain)
     }
 }
 

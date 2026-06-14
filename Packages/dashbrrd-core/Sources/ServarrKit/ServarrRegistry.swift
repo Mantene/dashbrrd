@@ -52,4 +52,13 @@ public enum ServarrRegistry {
         default: []
         }
     }
+
+    /// Library (series/movies) for library-capable kinds; `[]` otherwise.
+    public static func library(kind: ServiceKind, profile: ConnectionProfile) async throws -> [MediaItem] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).library()
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).library()
+        default: []
+        }
+    }
 }

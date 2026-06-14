@@ -1,0 +1,22 @@
+[
+  {
+    "id": 5,
+    "title": "Example Series One",
+    "year": 2024,
+    "monitored": true,
+    "status": "continuing",
+    "statistics": { "seasonCount": 4, "episodeCount": 30, "episodeFileCount": 24 },
+    "images": [
+      { "coverType": "poster", "url": "/MediaCover/5/poster.jpg", "remoteUrl": "https://example.test/p5.jpg" }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Another Show",
+    "year": 2020,
+    "monitored": false,
+    "status": "ended",
+    "statistics": { "seasonCount": 1, "episodeCount": 10, "episodeFileCount": 10 },
+    "images": []
+  }
+]

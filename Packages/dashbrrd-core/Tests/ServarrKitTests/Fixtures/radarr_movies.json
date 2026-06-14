@@ -1,0 +1,20 @@
+[
+  {
+    "id": 201,
+    "title": "Example Movie One",
+    "year": 2026,
+    "monitored": true,
+    "hasFile": false,
+    "images": [
+      { "coverType": "poster", "url": "/MediaCover/201/poster.jpg", "remoteUrl": "https://example.test/m201.jpg" }
+    ]
+  },
+  {
+    "id": 202,
+    "title": "Example Movie Two",
+    "year": 2025,
+    "monitored": true,
+    "hasFile": true,
+    "images": []
+  }
+]

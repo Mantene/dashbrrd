@@ -62,4 +62,14 @@ struct ServarrLiveIntegrationTests {
             #expect(!entry.title.isEmpty)
         }
     }
+
+    @Test("live library decodes through the real stack", arguments: [ServiceKind.sonarr, .radarr])
+    func liveLibrary(kind: ServiceKind) async throws {
+        guard let profile = Self.profile(for: kind) else { return }
+        let items = try await ServarrRegistry.library(kind: kind, profile: profile)
+        for item in items {
+            #expect(item.serviceKind == kind)
+            #expect(!item.title.isEmpty)
+        }
+    }
 }

@@ -19,6 +19,7 @@ public struct RootView: View {
     @State private var calendarStore: CalendarStore
     @State private var healthStore: HealthStore
     @State private var dashboardStore: DashboardStore
+    @State private var libraryStore: LibraryStore
 
     public init(services: AppServices) {
         _settingsStore = State(initialValue: SettingsStore(
@@ -31,6 +32,7 @@ public struct RootView: View {
             calendarLoader: services.calendarLoader,
             healthLoader: services.healthLoader
         ))
+        _libraryStore = State(initialValue: LibraryStore(loader: services.libraryLoader))
     }
 
     public var body: some View {
@@ -96,7 +98,7 @@ public struct RootView: View {
         case .dashboard: DashboardScreen(store: dashboardStore, healthStore: healthStore)
         case .calendar: CalendarScreen(store: calendarStore)
         case .queue: QueueScreen()
-        case .library: LibraryScreen()
+        case .library: LibraryScreen(store: libraryStore)
         case .activity: HistoryScreen()
         case .settings: SettingsScreen(store: settingsStore)
         }
