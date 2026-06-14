@@ -18,6 +18,7 @@ public struct AppServices {
     let calendarLoader: any CalendarLoading
     let healthLoader: any HealthLoading
     let libraryLoader: any LibraryLoading
+    let mediaController: any MediaControlling
     let queueLoader: any QueueLoading
     let queueController: any QueueControlling
     let historyLoader: any HistoryLoading
@@ -29,6 +30,7 @@ public struct AppServices {
         self.calendarLoader = CalendarAggregator(container: container, keychain: keychain)
         self.healthLoader = HealthAggregator(container: container, keychain: keychain)
         self.libraryLoader = LibraryAggregator(container: container, keychain: keychain)
+        self.mediaController = LiveMediaController(container: container, keychain: keychain)
         self.queueLoader = QueueAggregator(container: container, keychain: keychain)
         self.queueController = LiveQueueController(container: container, keychain: keychain)
         self.historyLoader = HistoryAggregator(container: container, keychain: keychain)

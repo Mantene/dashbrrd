@@ -16,3 +16,9 @@ public struct LibraryResult: Sendable {
 public protocol LibraryLoading: Sendable {
     func loadLibrary() async -> LibraryResult
 }
+
+/// Edit/delete actions on a media record. Implemented by `AppCore.LiveMediaController`.
+public protocol MediaControlling: Sendable {
+    func setMonitored(_ item: MediaItem, monitored: Bool) async throws
+    func delete(_ item: MediaItem, deleteFiles: Bool) async throws
+}

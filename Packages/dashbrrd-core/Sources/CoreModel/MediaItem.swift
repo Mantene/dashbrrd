@@ -7,10 +7,13 @@ public struct MediaItem: Sendable, Hashable, Identifiable {
     public var id: String
     public var instanceID: InstanceID
     public var serviceKind: ServiceKind
+    /// The upstream record id (Sonarr series id / Radarr movie id) for edit/delete calls.
+    public var remoteID: Int
     public var title: String
     public var year: Int?
     public var posterURL: URL?
     public var monitored: Bool
+    public var overview: String?
     /// Service-specific one-liner, e.g. "Continuing · 24/30" (Sonarr) or "Downloaded" (Radarr).
     public var subtitle: String?
 
@@ -18,19 +21,23 @@ public struct MediaItem: Sendable, Hashable, Identifiable {
         id: String,
         instanceID: InstanceID,
         serviceKind: ServiceKind,
+        remoteID: Int,
         title: String,
         year: Int? = nil,
         posterURL: URL? = nil,
         monitored: Bool = true,
+        overview: String? = nil,
         subtitle: String? = nil
     ) {
         self.id = id
         self.instanceID = instanceID
         self.serviceKind = serviceKind
+        self.remoteID = remoteID
         self.title = title
         self.year = year
         self.posterURL = posterURL
         self.monitored = monitored
+        self.overview = overview
         self.subtitle = subtitle
     }
 

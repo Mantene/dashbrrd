@@ -6,6 +6,7 @@ import DesignSystem
 /// reusing the shared `PosterCard`. Per-instance failures surface as chips.
 public struct LibraryScreen: View {
     @State private var store: LibraryStore
+    @State private var selected: MediaItem?
 
     public init(store: LibraryStore) {
         _store = State(initialValue: store)
@@ -27,6 +28,17 @@ public struct LibraryScreen: View {
         .navigationTitle("Library")
         .task { await store.load() }
         .refreshable { await store.load() }
+        .sheet(item: $selected) { item in
+            MediaDetailView(item: item, store: store)
+        }
+        .alert("Action Failed", isPresented: Binding(
+            get: { store.actionError != nil },
+            set: { if !$0 { store.actionError = nil } }
+        )) {
+            Button("OK", role: .cancel) { store.actionError = nil }
+        } message: {
+            Text(store.actionError ?? "")
+        }
     }
 
     @ViewBuilder
@@ -61,7 +73,10 @@ public struct LibraryScreen: View {
 
                             LazyVGrid(columns: columns, spacing: DS.Spacing.md) {
                                 ForEach(group.items) { item in
-                                    PosterCard(item: item)
+                                    Button { selected = item } label: {
+                                        PosterCard(item: item)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.horizontal, DS.Spacing.md)

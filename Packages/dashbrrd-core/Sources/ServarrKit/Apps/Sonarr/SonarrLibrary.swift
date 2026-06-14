@@ -11,6 +11,7 @@ struct SonarrSeriesListItemDTO: Decodable, Sendable {
     let year: Int?
     let monitored: Bool
     let status: String?
+    let overview: String?
     let statistics: Statistics?
     let images: [SonarrImageDTO]?
 
@@ -35,10 +36,12 @@ struct SonarrSeriesListItemDTO: Decodable, Sendable {
             id: "\(instanceID.rawValue.uuidString):\(id)",
             instanceID: instanceID,
             serviceKind: .sonarr,
+            remoteID: id,
             title: title,
             year: year,
             posterURL: posterURL,
             monitored: monitored,
+            overview: overview,
             subtitle: parts.isEmpty ? nil : parts.joined(separator: " · ")
         )
     }

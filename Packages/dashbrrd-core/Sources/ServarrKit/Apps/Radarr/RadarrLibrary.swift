@@ -10,6 +10,7 @@ struct RadarrMovieListItemDTO: Decodable, Sendable {
     let year: Int?
     let monitored: Bool
     let hasFile: Bool
+    let overview: String?
     let images: [RadarrImageDTO]?
 
     var posterURL: URL? {
@@ -23,10 +24,12 @@ struct RadarrMovieListItemDTO: Decodable, Sendable {
             id: "\(instanceID.rawValue.uuidString):\(id)",
             instanceID: instanceID,
             serviceKind: .radarr,
+            remoteID: id,
             title: title,
             year: year,
             posterURL: posterURL,
             monitored: monitored,
+            overview: overview,
             subtitle: hasFile ? "Downloaded" : "Missing"
         )
     }

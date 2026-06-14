@@ -34,7 +34,10 @@ public struct RootView: View {
             calendarLoader: services.calendarLoader,
             healthLoader: services.healthLoader
         ))
-        _libraryStore = State(initialValue: LibraryStore(loader: services.libraryLoader))
+        _libraryStore = State(initialValue: LibraryStore(
+            loader: services.libraryLoader,
+            controller: services.mediaController
+        ))
         _queueStore = State(initialValue: QueueStore(
             loader: services.queueLoader,
             controller: services.queueController

@@ -79,4 +79,31 @@ public enum ServarrRegistry {
         default: []
         }
     }
+
+    /// The REST resource name for a kind's media records ("series" / "movie").
+    static func mediaResource(for kind: ServiceKind) -> String? {
+        switch kind {
+        case .sonarr: "series"
+        case .radarr: "movie"
+        default: nil
+        }
+    }
+
+    public static func setMonitored(kind: ServiceKind, profile: ConnectionProfile, remoteID: Int, monitored: Bool) async throws {
+        guard let resource = mediaResource(for: kind) else { return }
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).setMonitored(resource: resource, id: remoteID, monitored: monitored)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).setMonitored(resource: resource, id: remoteID, monitored: monitored)
+        default: break
+        }
+    }
+
+    public static func deleteMedia(kind: ServiceKind, profile: ConnectionProfile, remoteID: Int, deleteFiles: Bool) async throws {
+        guard let resource = mediaResource(for: kind) else { return }
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).deleteMedia(resource: resource, id: remoteID, deleteFiles: deleteFiles)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).deleteMedia(resource: resource, id: remoteID, deleteFiles: deleteFiles)
+        default: break
+        }
+    }
 }

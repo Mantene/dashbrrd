@@ -23,6 +23,28 @@ public actor ServarrClient<Descriptor: ServarrDescriptor> {
     /// Exposed to constrained extensions (e.g. Sonarr calendar) that build app-specific endpoints.
     var httpClient: HTTPClientProtocol { http }
 
+    /// Toggles the `monitored` flag on a media record. Servarr requires the *full* object on
+    /// PUT, so we GET it, flip one field via JSONSerialization (avoids modeling the whole
+    /// schema), and PUT it back. `resource` is "series" (Sonarr) or "movie" (Radarr).
+    public func setMonitored(resource: String, id: Int, monitored: Bool) async throws {
+        let data = try await http.data(for: Endpoint(path: "\(resource)/\(id)"))
+        guard var object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw APIError.decoding("Expected a JSON object for \(resource)/\(id)", raw: String(data: data, encoding: .utf8))
+        }
+        object["monitored"] = monitored
+        let body = try JSONSerialization.data(withJSONObject: object)
+        _ = try await http.data(for: Endpoint(method: .put, path: "\(resource)/\(id)", body: body))
+    }
+
+    /// Deletes a media record, optionally removing files from disk.
+    public func deleteMedia(resource: String, id: Int, deleteFiles: Bool) async throws {
+        _ = try await http.data(for: Endpoint(
+            method: .delete,
+            path: "\(resource)/\(id)",
+            query: [URLQueryItem(name: "deleteFiles", value: deleteFiles ? "true" : "false")]
+        ))
+    }
+
     /// Cheap identity probe used by Test Connection and to read the running version.
     public func systemStatus() async throws -> SystemStatus {
         let dto = try await http.send(Endpoint(path: "system/status"), as: ServarrSystemStatusDTO.self)
