@@ -1,0 +1,24 @@
+[
+  {
+    "hash": "abc123",
+    "name": "Example.Torrent.One",
+    "progress": 0.42,
+    "size": 2000000000,
+    "amount_left": 1160000000,
+    "dlspeed": 1500000,
+    "eta": 900,
+    "state": "downloading",
+    "category": "tv"
+  },
+  {
+    "hash": "def456",
+    "name": "Example.Torrent.Two",
+    "progress": 1.0,
+    "size": 500000000,
+    "amount_left": 0,
+    "dlspeed": 0,
+    "eta": 8640000,
+    "state": "stalledUP",
+    "category": ""
+  }
+]

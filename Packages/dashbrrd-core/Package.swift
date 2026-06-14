@@ -84,5 +84,11 @@ let package = Package(
             resources: [.process("Fixtures")],
             swiftSettings: strictConcurrency
         ),
+        .testTarget(
+            name: "DownloadClientKitTests",
+            dependencies: ["DownloadClientKit", "Networking", "CoreModel"],
+            resources: [.process("Fixtures")],
+            swiftSettings: strictConcurrency
+        ),
     ]
 )

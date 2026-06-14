@@ -1,0 +1,39 @@
+{
+  "queue": {
+    "status": "Downloading",
+    "speed": "1.2 M",
+    "kbpersec": "1200",
+    "mbleft": "4500",
+    "mb": "5000",
+    "slots": [
+      {
+        "status": "Downloading",
+        "index": 0,
+        "nzo_id": "SABnzbd_nzo_aaa",
+        "filename": "Example.Show.S01E01",
+        "mb": "1000",
+        "mbleft": "500",
+        "size": "1.0 GB",
+        "sizeleft": "500 MB",
+        "percentage": "50",
+        "timeleft": "0:10:00",
+        "cat": "tv",
+        "priority": "Normal"
+      },
+      {
+        "status": "Paused",
+        "index": 1,
+        "nzo_id": "SABnzbd_nzo_bbb",
+        "filename": "Example.Movie.2026",
+        "mb": "4000",
+        "mbleft": "4000",
+        "size": "4.0 GB",
+        "sizeleft": "4.0 GB",
+        "percentage": "0",
+        "timeleft": "0:00:00",
+        "cat": "",
+        "priority": "Normal"
+      }
+    ]
+  }
+}

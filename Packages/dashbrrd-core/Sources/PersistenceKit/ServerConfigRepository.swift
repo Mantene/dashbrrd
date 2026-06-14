@@ -32,10 +32,23 @@ public final class ServerConfigRepository {
     public func connectionProfile(for config: ServerConfig) throws -> ConnectionProfile {
         var credentials: [ConnectionProfile.Credential] = []
 
-        if config.kind.isServarr,
-           let apiKey = try keychain.get(config.id, slot: .apiKey) {
-            credentials.append(.apiKey(apiKey))
+        switch config.kind {
+        case .sonarr, .radarr, .prowlarr, .lidarr, .readarr:
+            // Servarr: X-Api-Key header.
+            if let apiKey = try keychain.get(config.id, slot: .apiKey) {
+                credentials.append(.apiKey(apiKey))
+            }
+        case .sabnzbd:
+            // SABnzbd: ?apikey= query parameter.
+            if let apiKey = try keychain.get(config.id, slot: .apiKey) {
+                credentials.append(.queryParam(name: "apikey", value: apiKey))
+            }
+        case .qbittorrent:
+            // qBittorrent uses a cookie session; on a LAN-bypassed setup no credential is
+            // needed. (Login support for authenticated setups is a follow-up.)
+            break
         }
+
         if config.useBasicAuth,
            let password = try keychain.get(config.id, slot: .basicAuthPassword) {
             // Username persistence arrives with the Phase 1 add-server form; placeholder for now.
