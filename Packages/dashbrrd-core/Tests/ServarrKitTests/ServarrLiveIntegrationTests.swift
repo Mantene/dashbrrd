@@ -72,4 +72,14 @@ struct ServarrLiveIntegrationTests {
             #expect(!item.title.isEmpty)
         }
     }
+
+    @Test("live Servarr queue decodes through the real stack", arguments: [ServiceKind.sonarr, .radarr])
+    func liveQueue(kind: ServiceKind) async throws {
+        guard let profile = Self.profile(for: kind) else { return }
+        let items = try await ServarrRegistry.queue(kind: kind, profile: profile)
+        for item in items {
+            #expect(item.serviceKind == kind)
+            #expect(item.progress >= 0 && item.progress <= 1)
+        }
+    }
 }

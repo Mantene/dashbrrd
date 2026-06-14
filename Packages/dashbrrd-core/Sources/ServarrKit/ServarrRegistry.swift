@@ -53,6 +53,15 @@ public enum ServarrRegistry {
         }
     }
 
+    /// Servarr-side queue for queue-capable kinds; `[]` otherwise (e.g. Prowlarr).
+    public static func queue(kind: ServiceKind, profile: ConnectionProfile) async throws -> [QueueItem] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).queue()
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).queue()
+        default: []
+        }
+    }
+
     /// Library (series/movies) for library-capable kinds; `[]` otherwise.
     public static func library(kind: ServiceKind, profile: ConnectionProfile) async throws -> [MediaItem] {
         switch kind {

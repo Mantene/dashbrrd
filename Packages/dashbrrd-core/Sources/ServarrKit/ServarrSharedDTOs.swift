@@ -27,3 +27,19 @@ extension HealthCheck.Severity {
         self = HealthCheck.Severity(rawValue: servarrType.lowercased()) ?? .notice
     }
 }
+
+// Shared `queue` shape (Sonarr/Radarr v3). Each record mirrors a download the client is
+// handling, with the `downloadId` used to dedup against the actual download-client queue.
+struct ServarrQueueResponseDTO: Decodable, Sendable {
+    let records: [ServarrQueueRecordDTO]
+}
+
+struct ServarrQueueRecordDTO: Decodable, Sendable {
+    let id: Int
+    let title: String?
+    let status: String?
+    let size: Double?
+    let sizeleft: Double?
+    let timeleft: String?
+    let downloadId: String?
+}

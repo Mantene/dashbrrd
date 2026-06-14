@@ -33,6 +33,34 @@ public actor ServarrClient<Descriptor: ServarrDescriptor> {
         )
     }
 
+    /// The Servarr-side download queue (shared shape across Sonarr/Radarr). `downloadID`
+    /// carries the client's id so the unified Queue can dedup against SAB/qBit.
+    public func queue() async throws -> [QueueItem] {
+        let dto = try await http.send(
+            Endpoint(path: "queue", query: [URLQueryItem(name: "pageSize", value: "200")]),
+            as: ServarrQueueResponseDTO.self
+        )
+        return dto.records.map { record in
+            let size = Int64(record.size ?? 0)
+            let left = Int64(record.sizeleft ?? 0)
+            let progress = size > 0 ? Double(size - left) / Double(size) : 0
+            return QueueItem(
+                id: "\(instanceID.rawValue.uuidString):q:\(record.id)",
+                instanceID: instanceID,
+                serviceKind: descriptor.kind,
+                name: record.title ?? "Unknown",
+                state: ServarrQueueMapper.state(record.status),
+                progress: max(0, min(1, progress)),
+                sizeBytes: size,
+                sizeLeftBytes: left,
+                speedBytesPerSec: 0,
+                etaSeconds: ServarrQueueMapper.parseTimeLeft(record.timeleft),
+                category: nil,
+                downloadID: record.downloadId ?? ""
+            )
+        }
+    }
+
     /// All health checks the service currently reports (shared shape across every *arr).
     public func health() async throws -> [HealthCheck] {
         let dtos = try await http.send(Endpoint(path: "health"), as: [ServarrHealthDTO].self)
