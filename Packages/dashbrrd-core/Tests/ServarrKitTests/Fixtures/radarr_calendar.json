@@ -1,0 +1,35 @@
+[
+  {
+    "id": 201,
+    "title": "Example Movie One",
+    "year": 2026,
+    "hasFile": false,
+    "monitored": true,
+    "overview": "An example movie overview.",
+    "inCinemas": "2026-05-01T00:00:00Z",
+    "physicalRelease": "2026-07-01T00:00:00Z",
+    "digitalRelease": "2026-06-15T00:00:00Z",
+    "runtime": 118,
+    "tmdbId": 99999,
+    "images": [
+      { "coverType": "poster", "url": "/MediaCover/201/poster.jpg", "remoteUrl": "https://example.test/poster201.jpg" }
+    ]
+  },
+  {
+    "id": 202,
+    "title": "Example Movie Two",
+    "year": 2026,
+    "hasFile": true,
+    "monitored": true,
+    "overview": null,
+    "inCinemas": "2026-06-20T00:00:00Z",
+    "images": []
+  },
+  {
+    "id": 203,
+    "title": "Movie With No Release Date",
+    "year": null,
+    "hasFile": false,
+    "monitored": false
+  }
+]

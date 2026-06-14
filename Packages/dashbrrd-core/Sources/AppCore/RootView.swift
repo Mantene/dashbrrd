@@ -17,6 +17,8 @@ public struct RootView: View {
     @State private var navigation = NavigationModel()
     @State private var settingsStore: SettingsStore
     @State private var calendarStore: CalendarStore
+    @State private var healthStore: HealthStore
+    @State private var dashboardStore: DashboardStore
 
     public init(services: AppServices) {
         _settingsStore = State(initialValue: SettingsStore(
@@ -24,6 +26,11 @@ public struct RootView: View {
             tester: services.connectionTester
         ))
         _calendarStore = State(initialValue: CalendarStore(loader: services.calendarLoader))
+        _healthStore = State(initialValue: HealthStore(loader: services.healthLoader))
+        _dashboardStore = State(initialValue: DashboardStore(
+            calendarLoader: services.calendarLoader,
+            healthLoader: services.healthLoader
+        ))
     }
 
     public var body: some View {
@@ -86,23 +93,12 @@ public struct RootView: View {
     @ViewBuilder
     private func screen(for section: NavigationModel.Section) -> some View {
         switch section {
-        case .dashboard: DashboardScreen()
+        case .dashboard: DashboardScreen(store: dashboardStore, healthStore: healthStore)
         case .calendar: CalendarScreen(store: calendarStore)
         case .queue: QueueScreen()
         case .library: LibraryScreen()
         case .activity: HistoryScreen()
         case .settings: SettingsScreen(store: settingsStore)
         }
-    }
-}
-
-/// Minimal Phase 0 dashboard placeholder (the real aggregated overview comes in Phase 2).
-struct DashboardScreen: View {
-    var body: some View {
-        ContentUnavailableView(
-            "Dashboard",
-            systemImage: "square.grid.2x2",
-            description: Text("An at-a-glance overview of all your servers will live here.")
-        )
     }
 }

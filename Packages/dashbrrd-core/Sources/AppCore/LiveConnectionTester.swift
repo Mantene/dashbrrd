@@ -10,8 +10,9 @@ import FeatureSettings
 struct LiveConnectionTester: ConnectionTesting {
 
     func test(_ draft: ServerDraft) async -> ConnectionOutcome {
-        // Phase 1 ships Sonarr; other kinds report "coming soon" rather than silently failing.
-        guard draft.kind == .sonarr else {
+        // Supported Servarr kinds test live; others (download clients, future apps) report
+        // "coming soon" rather than silently failing.
+        guard ServarrRegistry.isSupported(draft.kind) else {
             return .failed(message: "\(draft.kind.displayName) support is coming in a later phase.")
         }
 
@@ -24,10 +25,9 @@ struct LiveConnectionTester: ConnectionTesting {
             trustPolicy: draft.trustPolicy,
             credentials: draft.apiKey.isEmpty ? [] : [.apiKey(draft.apiKey)]
         )
-        let client = ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile)
 
         do {
-            let status = try await client.systemStatus()
+            let status = try await ServarrRegistry.systemStatus(kind: draft.kind, profile: profile)
             return .success(version: status.version, appName: status.appName)
         } catch let error as APIError {
             return Self.map(error, draft: draft)

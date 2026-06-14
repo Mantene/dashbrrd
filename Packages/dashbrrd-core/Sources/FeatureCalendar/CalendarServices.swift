@@ -1,19 +1,7 @@
 import Foundation
 import CoreModel
 
-/// One instance's failure during a fan-out load — surfaced as a per-instance chip rather
-/// than blanking the whole aggregated view. Partial failure is first-class by design.
-public struct InstanceFailure: Sendable, Identifiable, Hashable {
-    public var id: InstanceID
-    public var displayName: String
-    public var message: String
-
-    public init(id: InstanceID, displayName: String, message: String) {
-        self.id = id
-        self.displayName = displayName
-        self.message = message
-    }
-}
+// `InstanceFailure` now lives in `CoreModel` (shared by Calendar + Health aggregation).
 
 /// The result of aggregating calendars across every calendar-capable instance: the merged
 /// entries plus any per-instance failures (both can be non-empty at once).
