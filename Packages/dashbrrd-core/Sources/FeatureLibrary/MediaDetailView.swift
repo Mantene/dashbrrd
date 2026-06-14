@@ -10,6 +10,7 @@ public struct MediaDetailView: View {
     let store: LibraryStore
 
     @State private var confirmingDelete = false
+    @State private var searching = false
 
     public init(item: MediaItem, store: LibraryStore) {
         self.item = item
@@ -46,6 +47,11 @@ public struct MediaDetailView: View {
                         get: { current.monitored },
                         set: { newValue in Task { await store.setMonitored(current, monitored: newValue) } }
                     ))
+                    Button {
+                        searching = true
+                    } label: {
+                        Label("Search Releases", systemImage: "magnifyingglass")
+                    }
                 }
 
                 Section {
@@ -62,6 +68,9 @@ public struct MediaDetailView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $searching) {
+                ReleaseListView(store: store.makeReleaseStore(for: current))
             }
             .confirmationDialog("Delete \(current.title)?", isPresented: $confirmingDelete, titleVisibility: .visible) {
                 Button("Remove from library", role: .destructive) {

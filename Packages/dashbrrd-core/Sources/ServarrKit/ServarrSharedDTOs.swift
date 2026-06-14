@@ -66,3 +66,31 @@ struct ServarrHistoryRecordDTO: Decodable, Sendable {
 
     var qualityName: String? { quality?.quality?.name }
 }
+
+// Shared interactive-search `release` shape (Sonarr/Radarr v3).
+struct ServarrReleaseDTO: Decodable, Sendable {
+    let guid: String
+    let title: String
+    let indexer: String?
+    let indexerId: Int?
+    let proto: String?
+    let size: Int64?
+    let seeders: Int?
+    let age: Int?
+    let quality: ServarrHistoryRecordDTO.QualityWrapperDTO?
+    let rejected: Bool?
+    let rejections: [String]?
+    let downloadAllowed: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case guid, title, indexer, indexerId
+        case proto = "protocol"
+        case size, seeders, age, quality, rejected, rejections, downloadAllowed
+    }
+}
+
+/// Body for POST `release` (grab → send to download client).
+struct ServarrGrabRequest: Encodable, Sendable {
+    let guid: String
+    let indexerId: Int
+}

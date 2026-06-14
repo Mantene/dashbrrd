@@ -14,10 +14,24 @@ public final class LibraryStore {
 
     private let loader: any LibraryLoading
     private let controller: any MediaControlling
+    private let releaseSearcher: any ReleaseSearching
+    private let releaseGrabber: any ReleaseGrabbing
 
-    public init(loader: any LibraryLoading, controller: any MediaControlling) {
+    public init(
+        loader: any LibraryLoading,
+        controller: any MediaControlling,
+        releaseSearcher: any ReleaseSearching,
+        releaseGrabber: any ReleaseGrabbing
+    ) {
         self.loader = loader
         self.controller = controller
+        self.releaseSearcher = releaseSearcher
+        self.releaseGrabber = releaseGrabber
+    }
+
+    /// Builds a release-search store for a media item (used by the detail view).
+    public func makeReleaseStore(for item: MediaItem) -> ReleaseStore {
+        ReleaseStore(item: item, searcher: releaseSearcher, grabber: releaseGrabber)
     }
 
     public func load() async {

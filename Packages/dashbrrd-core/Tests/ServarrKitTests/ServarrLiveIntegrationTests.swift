@@ -93,4 +93,38 @@ struct ServarrLiveIntegrationTests {
             #expect(!record.title.isEmpty)
         }
     }
+
+    @Test("live interactive release search decodes (read-only)", arguments: [ServiceKind.sonarr, .radarr])
+    func liveReleaseSearch(kind: ServiceKind) async throws {
+        guard let profile = Self.profile(for: kind) else { return }
+        let library = try await ServarrRegistry.library(kind: kind, profile: profile)
+        guard let first = library.first else { return }
+        let releases = try await ServarrRegistry.releaseSearch(kind: kind, profile: profile, remoteID: first.remoteID)
+        for release in releases.prefix(5) {
+            #expect(release.serviceKind == kind)
+            #expect(!release.guid.isEmpty)
+        }
+    }
+
+    /// Authorized one-off live grab. Gated by GRAB_CONFIRM=1. Picks the SMALLEST grabbable
+    /// release for the first Sonarr series and grabs it, printing exactly what was sent.
+    @Test("live grab smallest (gated)")
+    func liveGrabSmallest() async throws {
+        guard ProcessInfo.processInfo.environment["GRAB_CONFIRM"] == "1",
+              let profile = Self.profile(for: .sonarr) else { return }
+        let library = try await ServarrRegistry.library(kind: .sonarr, profile: profile)
+        guard let first = library.first else { return }
+        let releases = try await ServarrRegistry.releaseSearch(kind: .sonarr, profile: profile, remoteID: first.remoteID)
+        let candidate = releases
+            .filter { $0.downloadAllowed && !$0.rejected && $0.sizeBytes > 0 }
+            .min { $0.sizeBytes < $1.sizeBytes }
+        guard let release = candidate else {
+            print("LIVE GRAB: no grabbable release found; nothing sent.")
+            return
+        }
+        let mb = release.sizeBytes / 1_000_000
+        print("LIVE GRAB → series=\(first.title) | \(release.title) | \(mb) MB | \(release.indexer) | guid=\(release.guid)")
+        try await ServarrRegistry.grab(kind: .sonarr, profile: profile, guid: release.guid, indexerID: release.indexerID)
+        print("LIVE GRAB: sent to download client OK.")
+    }
 }

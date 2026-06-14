@@ -36,6 +36,40 @@ public actor ServarrClient<Descriptor: ServarrDescriptor> {
         _ = try await http.data(for: Endpoint(method: .put, path: "\(resource)/\(id)", body: body))
     }
 
+    /// Interactive release search for a media item. `paramName` is "seriesId" (Sonarr) or
+    /// "movieId" (Radarr). Read-only — queries the configured indexers.
+    public func releaseSearch(paramName: String, mediaID: Int) async throws -> [Release] {
+        let dtos = try await http.send(
+            Endpoint(path: "release", query: [URLQueryItem(name: paramName, value: "\(mediaID)")]),
+            as: [ServarrReleaseDTO].self
+        )
+        return dtos.map { dto in
+            Release(
+                id: dto.guid,
+                instanceID: instanceID,
+                serviceKind: descriptor.kind,
+                guid: dto.guid,
+                indexerID: dto.indexerId ?? 0,
+                title: dto.title,
+                indexer: dto.indexer ?? "Unknown",
+                isUsenet: (dto.proto ?? "").lowercased() == "usenet",
+                sizeBytes: dto.size ?? 0,
+                seeders: dto.seeders,
+                ageDays: dto.age ?? 0,
+                quality: dto.quality?.quality?.name,
+                rejected: dto.rejected ?? false,
+                rejections: dto.rejections ?? [],
+                downloadAllowed: dto.downloadAllowed ?? true
+            )
+        }
+    }
+
+    /// Grabs a release → Servarr sends it to the appropriate download client. A real state change.
+    public func grab(guid: String, indexerID: Int) async throws {
+        let body = try JSONEncoder().encode(ServarrGrabRequest(guid: guid, indexerId: indexerID))
+        _ = try await http.data(for: Endpoint(method: .post, path: "release", body: body))
+    }
+
     /// Deletes a media record, optionally removing files from disk.
     public func deleteMedia(resource: String, id: Int, deleteFiles: Bool) async throws {
         _ = try await http.data(for: Endpoint(

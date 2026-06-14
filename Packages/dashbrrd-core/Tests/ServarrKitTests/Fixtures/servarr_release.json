@@ -1,0 +1,29 @@
+[
+  {
+    "guid": "release-aaa",
+    "title": "Example.Release.2026.1080p.WEBDL",
+    "indexer": "NZBgeek (Prowlarr)",
+    "indexerId": 7,
+    "protocol": "usenet",
+    "size": 1500000000,
+    "age": 10,
+    "quality": { "quality": { "name": "WEBDL-1080p" } },
+    "rejected": false,
+    "rejections": [],
+    "downloadAllowed": true
+  },
+  {
+    "guid": "release-bbb",
+    "title": "Example.Release.2026.720p.HDTV",
+    "indexer": "Some Tracker (Prowlarr)",
+    "indexerId": 3,
+    "protocol": "torrent",
+    "size": 800000000,
+    "seeders": 42,
+    "age": 100,
+    "quality": { "quality": { "name": "HDTV-720p" } },
+    "rejected": true,
+    "rejections": ["Not an upgrade for existing file"],
+    "downloadAllowed": false
+  }
+]

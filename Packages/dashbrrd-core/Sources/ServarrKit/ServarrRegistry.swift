@@ -80,6 +80,24 @@ public enum ServarrRegistry {
         }
     }
 
+    /// Interactive release search for a media item (Sonarr by seriesId, Radarr by movieId).
+    public static func releaseSearch(kind: ServiceKind, profile: ConnectionProfile, remoteID: Int) async throws -> [Release] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).releaseSearch(paramName: "seriesId", mediaID: remoteID)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).releaseSearch(paramName: "movieId", mediaID: remoteID)
+        default: []
+        }
+    }
+
+    /// Grabs a release (sends it to the download client). A real state change.
+    public static func grab(kind: ServiceKind, profile: ConnectionProfile, guid: String, indexerID: Int) async throws {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).grab(guid: guid, indexerID: indexerID)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).grab(guid: guid, indexerID: indexerID)
+        default: break
+        }
+    }
+
     /// The REST resource name for a kind's media records ("series" / "movie").
     static func mediaResource(for kind: ServiceKind) -> String? {
         switch kind {

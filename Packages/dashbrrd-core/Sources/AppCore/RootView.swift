@@ -36,7 +36,9 @@ public struct RootView: View {
         ))
         _libraryStore = State(initialValue: LibraryStore(
             loader: services.libraryLoader,
-            controller: services.mediaController
+            controller: services.mediaController,
+            releaseSearcher: services.releaseSearcher,
+            releaseGrabber: services.releaseGrabber
         ))
         _queueStore = State(initialValue: QueueStore(
             loader: services.queueLoader,

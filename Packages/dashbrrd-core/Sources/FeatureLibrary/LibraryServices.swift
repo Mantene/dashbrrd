@@ -22,3 +22,13 @@ public protocol MediaControlling: Sendable {
     func setMonitored(_ item: MediaItem, monitored: Bool) async throws
     func delete(_ item: MediaItem, deleteFiles: Bool) async throws
 }
+
+/// Interactive release search for a media item (read-only). `AppCore.LiveReleaseController`.
+public protocol ReleaseSearching: Sendable {
+    func search(_ item: MediaItem) async throws -> [Release]
+}
+
+/// Grabs a release → sends it to the download client (a real state change).
+public protocol ReleaseGrabbing: Sendable {
+    func grab(_ release: Release) async throws
+}
