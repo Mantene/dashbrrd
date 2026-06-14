@@ -43,7 +43,8 @@ public struct RootView: View {
         ))
         _queueStore = State(initialValue: QueueStore(
             loader: services.queueLoader,
-            controller: services.queueController
+            controller: services.queueController,
+            manualImporter: services.manualImporter
         ))
         _historyStore = State(initialValue: HistoryStore(loader: services.historyLoader))
     }

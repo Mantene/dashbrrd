@@ -15,10 +15,17 @@ public final class QueueStore {
 
     private let loader: any QueueLoading
     private let controller: any QueueControlling
+    private let manualImporter: any ManualImporting
 
-    public init(loader: any QueueLoading, controller: any QueueControlling) {
+    public init(loader: any QueueLoading, controller: any QueueControlling, manualImporter: any ManualImporting) {
         self.loader = loader
         self.controller = controller
+        self.manualImporter = manualImporter
+    }
+
+    /// Builds a manual-import store (used by the Queue's "Manual Import" action).
+    public func makeManualImportStore() -> ManualImportStore {
+        ManualImportStore(importer: manualImporter)
     }
 
     public func load() async {

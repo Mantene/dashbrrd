@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "name": "Example.Show.S04E06.1080p.WEB.h264-GRP.mkv",
+    "relativePath": "Example.Show.S04E06.1080p.WEB.h264-GRP.mkv",
+    "path": "/downloads/Example.Show.S04E06/Example.Show.S04E06.mkv",
+    "size": 2500000000,
+    "series": { "id": 295, "title": "Example Show" },
+    "seasonNumber": 4,
+    "episodes": [ { "id": 9001, "episodeNumber": 6 } ],
+    "quality": { "quality": { "id": 3, "name": "WEBDL-1080p" } },
+    "languages": [ { "id": 1, "name": "English" } ],
+    "releaseGroup": "GRP",
+    "downloadId": "ABC123",
+    "rejections": []
+  },
+  {
+    "id": 2,
+    "name": "Unrecognized.File.mkv",
+    "path": "/downloads/x/Unrecognized.File.mkv",
+    "size": 100000,
+    "quality": { "quality": { "name": "Unknown" } },
+    "rejections": [ { "reason": "Unable to parse file", "type": "permanent" } ]
+  }
+]

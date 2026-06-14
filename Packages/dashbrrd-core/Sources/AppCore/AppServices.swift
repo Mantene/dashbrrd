@@ -24,6 +24,7 @@ public struct AppServices {
     let mediaAdder: any MediaAdding
     let queueLoader: any QueueLoading
     let queueController: any QueueControlling
+    let manualImporter: any ManualImporting
     let historyLoader: any HistoryLoading
 
     public init(container: ModelContainer, keychain: KeychainStore) {
@@ -40,6 +41,7 @@ public struct AppServices {
         self.mediaAdder = LiveMediaAdder(container: container, keychain: keychain)
         self.queueLoader = QueueAggregator(container: container, keychain: keychain)
         self.queueController = LiveQueueController(container: container, keychain: keychain)
+        self.manualImporter = LiveManualImporter(container: container, keychain: keychain)
         self.historyLoader = HistoryAggregator(container: container, keychain: keychain)
     }
 }

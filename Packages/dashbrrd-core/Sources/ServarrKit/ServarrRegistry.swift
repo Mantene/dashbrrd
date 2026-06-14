@@ -151,6 +151,24 @@ public enum ServarrRegistry {
         }
     }
 
+    /// Manual-import candidates for a download (Sonarr/Radarr).
+    public static func manualImportCandidates(kind: ServiceKind, profile: ConnectionProfile, downloadID: String) async throws -> [ManualImportCandidate] {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).manualImportCandidates(downloadID: downloadID)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).manualImportCandidates(downloadID: downloadID)
+        default: []
+        }
+    }
+
+    /// Performs a manual import of the given candidate payloads. A real state change.
+    public static func manualImport(kind: ServiceKind, profile: ConnectionProfile, payloads: [Data], importMode: String) async throws {
+        switch kind {
+        case .sonarr: try await ServarrClientFactory.make(descriptor: SonarrDescriptor(), profile: profile).manualImport(payloads: payloads, importMode: importMode)
+        case .radarr: try await ServarrClientFactory.make(descriptor: RadarrDescriptor(), profile: profile).manualImport(payloads: payloads, importMode: importMode)
+        default: break
+        }
+    }
+
     /// The REST resource name for a kind's media records ("series" / "movie").
     static func mediaResource(for kind: ServiceKind) -> String? {
         switch kind {

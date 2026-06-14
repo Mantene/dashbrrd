@@ -134,6 +134,89 @@ public actor ServarrClient<Descriptor: ServarrDescriptor> {
         return urlString.flatMap(URL.init(string:))
     }
 
+    /// Manual-import candidates for a download (files Servarr didn't auto-import). Keeps each
+    /// candidate's raw JSON so the import command preserves the detected episode/quality mapping.
+    public func manualImportCandidates(downloadID: String) async throws -> [ManualImportCandidate] {
+        let data = try await http.data(for: Endpoint(path: "manualimport", query: [
+            URLQueryItem(name: "downloadId", value: downloadID),
+            URLQueryItem(name: "filterExistingFiles", value: "true"),
+        ]))
+        guard let array = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            throw APIError.decoding("Expected an array for manualimport", raw: String(data: data, encoding: .utf8))
+        }
+        return array.map { dict in
+            let payload = (try? JSONSerialization.data(withJSONObject: dict)) ?? Data()
+            let candidateID = dict["id"] as? Int ?? 0
+            let fileName = (dict["name"] as? String) ?? (dict["relativePath"] as? String) ?? "File"
+            let size = (dict["size"] as? NSNumber)?.int64Value ?? 0
+            let rejections = Self.rejectionReasons(dict["rejections"])
+            let quality = ((dict["quality"] as? [String: Any])?["quality"] as? [String: Any])?["name"] as? String
+
+            var title = "Unrecognized file"
+            var hasTarget = false
+            if let series = dict["series"] as? [String: Any] {
+                let showTitle = series["title"] as? String ?? "Series"
+                let episodes = (dict["episodes"] as? [[String: Any]]) ?? []
+                let code = (dict["seasonNumber"] as? Int).map { String(format: "S%02d", $0) } ?? ""
+                let eps = episodes.compactMap { $0["episodeNumber"] as? Int }.map { String(format: "E%02d", $0) }.joined()
+                title = eps.isEmpty ? showTitle : "\(showTitle) · \(code)\(eps)"
+                hasTarget = (series["id"] as? Int ?? 0) > 0 && !episodes.isEmpty
+            } else if let movie = dict["movie"] as? [String: Any] {
+                let movieTitle = movie["title"] as? String ?? "Movie"
+                title = (movie["year"] as? Int).map { "\(movieTitle) (\($0))" } ?? movieTitle
+                hasTarget = (movie["id"] as? Int ?? 0) > 0
+            }
+
+            return ManualImportCandidate(
+                id: "\(instanceID.rawValue.uuidString):\(candidateID)",
+                instanceID: instanceID,
+                serviceKind: descriptor.kind,
+                fileName: fileName,
+                title: title,
+                qualityName: quality,
+                sizeBytes: size,
+                rejections: rejections,
+                importable: rejections.isEmpty && hasTarget,
+                rawPayload: payload
+            )
+        }
+    }
+
+    /// Imports the chosen candidates by POSTing a ManualImport command built from their payloads.
+    /// `importMode` is "move" or "copy".
+    public func manualImport(payloads: [Data], importMode: String) async throws {
+        let isMovie = descriptor.kind == .radarr
+        var files: [[String: Any]] = []
+        for payload in payloads {
+            guard let dict = try JSONSerialization.jsonObject(with: payload) as? [String: Any] else { continue }
+            var entry: [String: Any] = [:]
+            for key in ["path", "quality", "languages", "releaseGroup", "downloadId", "indexerFlags"] {
+                if let value = dict[key] { entry[key] = value }
+            }
+            if isMovie {
+                if let movie = dict["movie"] as? [String: Any], let id = movie["id"] { entry["movieId"] = id }
+            } else {
+                if let series = dict["series"] as? [String: Any], let id = series["id"] { entry["seriesId"] = id }
+                entry["episodeIds"] = ((dict["episodes"] as? [[String: Any]]) ?? []).compactMap { $0["id"] }
+            }
+            files.append(entry)
+        }
+        let command: [String: Any] = ["name": "ManualImport", "importMode": importMode, "files": files]
+        let body = try JSONSerialization.data(withJSONObject: command)
+        _ = try await http.data(for: Endpoint(method: .post, path: "command", body: body))
+    }
+
+    /// Servarr rejections come as objects ({reason,type}) or sometimes plain strings.
+    static func rejectionReasons(_ raw: Any?) -> [String] {
+        if let objects = raw as? [[String: Any]] {
+            return objects.compactMap { $0["reason"] as? String }
+        }
+        if let strings = raw as? [String] {
+            return strings
+        }
+        return []
+    }
+
     /// Grabs a release → Servarr sends it to the appropriate download client. A real state change.
     public func grab(guid: String, indexerID: Int) async throws {
         let body = try JSONEncoder().encode(ServarrGrabRequest(guid: guid, indexerId: indexerID))

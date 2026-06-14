@@ -6,6 +6,7 @@ import DesignSystem
 /// Download-client items get inline pause/resume/remove (optimistic); Servarr items are read-only.
 public struct QueueScreen: View {
     @State private var store: QueueStore
+    @State private var manualImporting = false
 
     public init(store: QueueStore) {
         _store = State(initialValue: store)
@@ -23,8 +24,16 @@ public struct QueueScreen: View {
             }
         }
         .navigationTitle("Queue")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { manualImporting = true } label: { Label("Manual Import", systemImage: "square.and.arrow.down") }
+            }
+        }
         .task { await store.load() }
         .refreshable { await store.load() }
+        .sheet(isPresented: $manualImporting) {
+            ManualImportView(store: store.makeManualImportStore())
+        }
         .alert("Action Failed", isPresented: Binding(
             get: { store.actionError != nil },
             set: { if !$0 { store.actionError = nil } }

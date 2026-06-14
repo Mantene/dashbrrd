@@ -120,6 +120,19 @@ struct ServarrLiveIntegrationTests {
         #expect(!folders.isEmpty)    // and a root folder
     }
 
+    @Test("live manual-import candidates decode (read-only)", arguments: [ServiceKind.sonarr, .radarr])
+    func liveManualImportCandidates(kind: ServiceKind) async throws {
+        guard let profile = Self.profile(for: kind) else { return }
+        let queue = try await ServarrRegistry.queue(kind: kind, profile: profile)
+        guard let download = queue.first(where: { !$0.downloadID.isEmpty }) else { return }
+        let candidates = try await ServarrRegistry.manualImportCandidates(kind: kind, profile: profile, downloadID: download.downloadID)
+        for candidate in candidates {
+            #expect(candidate.serviceKind == kind)
+            #expect(!candidate.fileName.isEmpty)
+            #expect(!candidate.rawPayload.isEmpty)
+        }
+    }
+
     /// Authorized one-off live grab. Gated by GRAB_CONFIRM=1. Picks the SMALLEST grabbable
     /// release for the first Sonarr series and grabs it, printing exactly what was sent.
     @Test("live grab smallest (gated)")
