@@ -26,7 +26,8 @@ public struct RootView: View {
     public init(services: AppServices) {
         _settingsStore = State(initialValue: SettingsStore(
             store: services.serverStore,
-            tester: services.connectionTester
+            tester: services.connectionTester,
+            refresher: services.refreshCoordinator
         ))
         _calendarStore = State(initialValue: CalendarStore(loader: services.calendarLoader))
         _healthStore = State(initialValue: HealthStore(loader: services.healthLoader))

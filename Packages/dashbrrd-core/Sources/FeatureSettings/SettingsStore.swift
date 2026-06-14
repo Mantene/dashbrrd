@@ -20,12 +20,30 @@ public final class SettingsStore {
     }
     public var testState: TestState = .idle
 
+    /// Transient status line for the Background Refresh section.
+    public var refreshStatus: String?
+    public private(set) var isRefreshing = false
+
     private let store: any ServerStoring
     private let tester: any ConnectionTesting
+    private let refresher: any BackgroundRefreshing
 
-    public init(store: any ServerStoring, tester: any ConnectionTesting) {
+    public init(store: any ServerStoring, tester: any ConnectionTesting, refresher: any BackgroundRefreshing) {
         self.store = store
         self.tester = tester
+        self.refresher = refresher
+    }
+
+    public func refreshNow() async {
+        isRefreshing = true
+        let count = await refresher.refreshNow()
+        isRefreshing = false
+        refreshStatus = count == 0 ? "Up to date — no new updates." : "Surfaced \(count) update\(count == 1 ? "" : "s")."
+    }
+
+    public func enableNotifications() async {
+        await refresher.requestNotifications()
+        refreshStatus = "Notification permission requested."
     }
 
     public func refresh() {

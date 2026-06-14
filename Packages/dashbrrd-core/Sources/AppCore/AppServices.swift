@@ -26,6 +26,7 @@ public struct AppServices {
     let queueController: any QueueControlling
     let manualImporter: any ManualImporting
     let historyLoader: any HistoryLoading
+    public let refreshCoordinator: RefreshCoordinator
 
     public init(container: ModelContainer, keychain: KeychainStore) {
         let repository = ServerConfigRepository(context: container.mainContext, keychain: keychain)
@@ -43,6 +44,16 @@ public struct AppServices {
         self.queueController = LiveQueueController(container: container, keychain: keychain)
         self.manualImporter = LiveManualImporter(container: container, keychain: keychain)
         self.historyLoader = HistoryAggregator(container: container, keychain: keychain)
+        self.refreshCoordinator = RefreshCoordinator(
+            queueLoader: QueueAggregator(container: container, keychain: keychain),
+            healthLoader: HealthAggregator(container: container, keychain: keychain),
+            digestStore: DigestStore()
+        )
     }
+}
+
+/// Lets the Settings UI drive manual refresh + notification permission.
+extension RefreshCoordinator: BackgroundRefreshing {
+    public func requestNotifications() async { await requestNotificationAuthorization() }
 }
 

@@ -30,6 +30,34 @@ public struct SettingsScreen: View {
                     }
                 }
             }
+
+            Section {
+                Button {
+                    Task { await store.refreshNow() }
+                } label: {
+                    HStack {
+                        Label("Refresh Now", systemImage: "arrow.clockwise")
+                        Spacer()
+                        if store.isRefreshing { ProgressView() }
+                    }
+                }
+                .disabled(store.isRefreshing)
+
+                Button {
+                    Task { await store.enableNotifications() }
+                } label: {
+                    Label("Enable Notifications", systemImage: "bell.badge")
+                }
+            } header: {
+                Text("Background Refresh")
+            } footer: {
+                VStack(alignment: .leading, spacing: 4) {
+                    if let status = store.refreshStatus {
+                        Text(status).foregroundStyle(.secondary)
+                    }
+                    Text("iOS runs background refresh opportunistically — often only a few times a day, for a few seconds. dashbrrd uses it for best-effort alerts on completed/failed downloads and new health issues; the app always reconciles fully when you open it.")
+                }
+            }
         }
         .navigationTitle("Settings")
         .toolbar {

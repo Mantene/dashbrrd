@@ -60,3 +60,10 @@ public protocol ServerStoring: AnyObject {
     func add(_ draft: ServerDraft) throws -> ServerConfig
     func delete(_ config: ServerConfig) throws
 }
+
+/// Manual control over background refresh (implemented by `AppCore.RefreshCoordinator`).
+public protocol BackgroundRefreshing: Sendable {
+    /// Runs a refresh now; returns the number of notifications it surfaced.
+    func refreshNow() async -> Int
+    func requestNotifications() async
+}
