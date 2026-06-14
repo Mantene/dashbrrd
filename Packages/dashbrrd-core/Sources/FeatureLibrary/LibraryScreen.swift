@@ -2,8 +2,8 @@ import SwiftUI
 import CoreModel
 import DesignSystem
 
-/// The Library: read-only poster grids grouped per service (a movies+episodes wall is noise),
-/// reusing the shared `PosterCard`. Per-instance failures surface as chips.
+/// The Library: one selected instance at a time (picked from a menu), with a title filter —
+/// large libraries are too unwieldy merged onto a single page.
 public struct LibraryScreen: View {
     @State private var store: LibraryStore
     @State private var selected: MediaItem?
@@ -17,83 +17,90 @@ public struct LibraryScreen: View {
 
     public var body: some View {
         Group {
-            switch store.state {
-            case .idle, .loading:
-                ProgressView("Loading library…")
-            case let .failed(message):
-                ContentUnavailableView("Couldn't Load", systemImage: "exclamationmark.triangle", description: Text(message))
-            case .loaded:
+            if store.instances.isEmpty {
+                ContentUnavailableView("No Library", systemImage: "rectangle.stack",
+                                       description: Text("Add a Sonarr or Radarr server to browse its library."))
+            } else {
                 content
             }
         }
-        .navigationTitle("Library")
+        .navigationTitle(store.selected?.name ?? "Library")
         .toolbar {
+            if store.instances.count > 1 {
+                ToolbarItem(placement: .principal) { libraryPicker }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button { addingMedia = true } label: { Label("Add Media", systemImage: "plus") }
             }
         }
-        .task { await store.load() }
-        .refreshable { await store.load() }
-        .sheet(item: $selected) { item in
-            MediaDetailView(item: item, store: store)
-        }
-        .sheet(isPresented: $addingMedia) {
-            AddMediaView(store: store.makeAddStore())
-        }
+        .searchable(text: $store.filterText, prompt: "Filter this library")
+        .task { await store.loadInstances() }
+        .sheet(item: $selected) { item in MediaDetailView(item: item, store: store) }
+        .sheet(isPresented: $addingMedia) { AddMediaView(store: store.makeAddStore()) }
         .alert("Action Failed", isPresented: Binding(
-            get: { store.actionError != nil },
-            set: { if !$0 { store.actionError = nil } }
-        )) {
-            Button("OK", role: .cancel) { store.actionError = nil }
-        } message: {
-            Text(store.actionError ?? "")
+            get: { store.actionError != nil }, set: { if !$0 { store.actionError = nil } }
+        )) { Button("OK", role: .cancel) { store.actionError = nil } } message: { Text(store.actionError ?? "") }
+    }
+
+    private var libraryPicker: some View {
+        Menu {
+            Picker("Library", selection: $store.selected) {
+                ForEach(store.instances) { instance in
+                    Label(instance.name, systemImage: instance.kind.symbolName).tag(Optional(instance))
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(store.selected?.name ?? "Library").font(.headline)
+                Image(systemName: "chevron.down").font(.caption2)
+            }
         }
     }
 
     @ViewBuilder
     private var content: some View {
-        let groups = store.groupedByService
-        if groups.isEmpty && store.failures.isEmpty {
-            ContentUnavailableView(
-                "Empty Library",
-                systemImage: "rectangle.stack",
-                description: Text("Add a Sonarr or Radarr server to browse its library.")
-            )
+        switch store.state {
+        case .idle, .loading:
+            ProgressView("Loading library…")
+        case let .failed(message):
+            ContentUnavailableView("Couldn't Load", systemImage: "exclamationmark.triangle", description: Text(message))
+        case .loaded:
+            grid
+        }
+    }
+
+    @ViewBuilder
+    private var grid: some View {
+        let items = store.visibleItems
+        if items.isEmpty {
+            if store.filterText.isEmpty {
+                ContentUnavailableView("Empty Library", systemImage: "rectangle.stack",
+                                       description: Text(store.failures.first.map { "\($0.displayName): \($0.message)" } ?? "Nothing here yet."))
+            } else {
+                ContentUnavailableView.search(text: store.filterText)
+            }
         } else {
             ScrollView {
-                VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                    ForEach(store.failures) { failure in
-                        Label("\(failure.displayName): \(failure.message)", systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange).font(.footnote)
-                            .padding(.horizontal, DS.Spacing.md)
-                    }
-
-                    ForEach(groups, id: \.kind) { group in
-                        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-                            HStack {
-                                Label(group.kind.displayName, systemImage: group.kind.symbolName)
-                                    .font(.headline)
-                                    .foregroundStyle(group.kind.accentColor)
-                                Spacer()
-                                Text("\(group.items.count)")
-                                    .font(.subheadline).foregroundStyle(.secondary)
-                            }
-                            .padding(.horizontal, DS.Spacing.md)
-
-                            LazyVGrid(columns: columns, spacing: DS.Spacing.md) {
-                                ForEach(group.items) { item in
-                                    Button { selected = item } label: {
-                                        PosterCard(item: item)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.horizontal, DS.Spacing.md)
-                        }
+                LazyVGrid(columns: columns, spacing: DS.Spacing.md) {
+                    ForEach(items) { item in
+                        Button { selected = item } label: { PosterCard(item: item) }
+                            .buttonStyle(.plain)
                     }
                 }
-                .padding(.vertical, DS.Spacing.md)
+                .padding(DS.Spacing.md)
             }
+            .overlay(alignment: .bottom) { countBadge(showing: items.count) }
         }
+    }
+
+    @ViewBuilder
+    private func countBadge(showing: Int) -> some View {
+        let total = store.totalCount
+        let text = showing == total ? "\(total) items" : "\(showing) of \(total)"
+        Text(text)
+            .font(.caption2).foregroundStyle(.secondary)
+            .padding(.horizontal, DS.Spacing.sm).padding(.vertical, DS.Spacing.xs)
+            .background(.ultraThinMaterial, in: Capsule())
+            .padding(.bottom, DS.Spacing.sm)
     }
 }

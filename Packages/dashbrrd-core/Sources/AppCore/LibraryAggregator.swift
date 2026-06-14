@@ -6,8 +6,8 @@ import ServarrKit
 import PersistenceKit
 import FeatureLibrary
 
-/// Fans out `library` across every enabled, library-capable instance and merges, with
-/// first-class partial failure (an unreachable server becomes a chip, not a blank grid).
+/// Lists library-capable instances and loads ONE at a time (large libraries make a merged
+/// page unwieldy). Per-instance load keeps the UI snappy and memory bounded.
 struct LibraryAggregator: LibraryLoading {
     private let container: ModelContainer
     private let keychain: KeychainStore
@@ -17,54 +17,37 @@ struct LibraryAggregator: LibraryLoading {
         self.keychain = keychain
     }
 
-    private struct Target: Sendable {
-        let config: ServerConfig
-        let profile: ConnectionProfile
-    }
-
-    private enum Outcome: Sendable {
-        case success([MediaItem])
-        case failure(id: InstanceID, name: String, message: String)
-    }
-
-    func loadLibrary() async -> LibraryResult {
-        let targets = await gatherTargets()
-        guard !targets.isEmpty else { return LibraryResult(items: [], failures: []) }
-
-        var items: [MediaItem] = []
-        var failures: [InstanceFailure] = []
-
-        await withTaskGroup(of: Outcome.self) { group in
-            for target in targets {
-                group.addTask {
-                    do {
-                        let loaded = try await ServarrRegistry.library(kind: target.config.kind, profile: target.profile)
-                        return .success(loaded)
-                    } catch {
-                        return .failure(id: target.config.id, name: target.config.displayName, message: Self.describe(error))
-                    }
-                }
-            }
-            for await outcome in group {
-                switch outcome {
-                case let .success(loaded): items.append(contentsOf: loaded)
-                case let .failure(id, name, message): failures.append(InstanceFailure(id: id, displayName: name, message: message))
-                }
-            }
+    func instances() async -> [LibraryInstance] {
+        await MainActor.run {
+            let repository = ServerConfigRepository(context: container.mainContext, keychain: keychain)
+            let configs = (try? repository.allConfigs()) ?? []
+            return configs
+                .filter { $0.isEnabled && ServarrRegistry.capabilities(for: $0.kind).contains(.library) }
+                .map { LibraryInstance(id: $0.id, name: $0.displayName, kind: $0.kind) }
         }
-        return LibraryResult(items: items, failures: failures)
+    }
+
+    func loadLibrary(_ instance: LibraryInstance) async -> LibraryResult {
+        guard let profile = await profile(for: instance.id) else {
+            return LibraryResult(items: [], failures: [
+                InstanceFailure(id: instance.id, displayName: instance.name, message: "Unavailable")
+            ])
+        }
+        do {
+            let items = try await ServarrRegistry.library(kind: instance.kind, profile: profile)
+            return LibraryResult(items: items, failures: [])
+        } catch {
+            return LibraryResult(items: [], failures: [
+                InstanceFailure(id: instance.id, displayName: instance.name, message: Self.describe(error))
+            ])
+        }
     }
 
     @MainActor
-    private func gatherTargets() -> [Target] {
+    private func profile(for instanceID: InstanceID) -> ConnectionProfile? {
         let repository = ServerConfigRepository(context: container.mainContext, keychain: keychain)
-        let configs = (try? repository.allConfigs()) ?? []
-        return configs
-            .filter { $0.isEnabled && ServarrRegistry.capabilities(for: $0.kind).contains(.library) }
-            .compactMap { config in
-                guard let profile = try? repository.connectionProfile(for: config) else { return nil }
-                return Target(config: config, profile: profile)
-            }
+        guard let config = (try? repository.allConfigs())?.first(where: { $0.id == instanceID }) else { return nil }
+        return try? repository.connectionProfile(for: config)
     }
 
     private static func describe(_ error: Error) -> String {

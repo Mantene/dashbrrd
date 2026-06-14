@@ -12,9 +12,21 @@ public struct LibraryResult: Sendable {
     }
 }
 
-/// Loads + merges library contents across instances. Implemented by `AppCore.LibraryAggregator`.
+/// A selectable library (one Sonarr/Radarr instance).
+public struct LibraryInstance: Sendable, Identifiable, Hashable {
+    public var id: InstanceID
+    public var name: String
+    public var kind: ServiceKind
+    public init(id: InstanceID, name: String, kind: ServiceKind) {
+        self.id = id; self.name = name; self.kind = kind
+    }
+}
+
+/// Lists library-capable instances and loads ONE at a time (large libraries make a single
+/// merged page unwieldy). Implemented by `AppCore.LibraryAggregator`.
 public protocol LibraryLoading: Sendable {
-    func loadLibrary() async -> LibraryResult
+    func instances() async -> [LibraryInstance]
+    func loadLibrary(_ instance: LibraryInstance) async -> LibraryResult
 }
 
 /// Edit/delete actions on a media record. Implemented by `AppCore.LiveMediaController`.

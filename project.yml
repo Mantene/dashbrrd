@@ -37,3 +37,13 @@ targets:
     dependencies:
       - package: dashbrrd-core
         product: AppCore
+
+schemes:
+  dashbrrd:
+    build:
+      targets:
+        dashbrrd: all
+    run:
+      config: Debug
+    test:
+      config: Debug
